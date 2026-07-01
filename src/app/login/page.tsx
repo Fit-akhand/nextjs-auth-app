@@ -1,25 +1,52 @@
 "use client";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {useRouter} from "next/navigation";
-import {axios} from "axios"
+import axios from "axios"
+import toast from "react-hot-toast";
 
 
 
 export default function SignupPage(){
+
+    const router = useRouter();
 
     const [user,setUser] = React.useState({
         email:"",
         password:"",
     })
 
-    const onLogin = async() =>{
+    const [buttonDisabled,setButtonDisabled] = useState(true);
 
+    const [loading,setLoading] = useState(false);
+
+    const onLogin = async() =>{
+        try {
+            setLoading(true);
+            const response = await axios.post("/api/users/login",user);
+            console.log("Login Success",response.data);
+            toast.success("Login Success")
+            router.push("/profile")
+        } catch (error: any) {
+            console.log("Login Failed",error.message);
+            toast.error(error.message);
+        }finally{
+            setLoading(false);
+        }
     }
+
+    useEffect(()=>{
+        if(user.email.length > 0 && user.password.length > 0){
+            setButtonDisabled(false);
+        }
+        else{
+            setButtonDisabled(true);
+        }
+    },[user])
 
     return(
         <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-900 via-gray-800 to-black px-4">
-    <div className="w-full max-w-md bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl p-8">
+        <div className="w-full max-w-md bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl p-8">
 
         <h1 className="text-4xl font-bold text-center text-white mb-2">
             Login

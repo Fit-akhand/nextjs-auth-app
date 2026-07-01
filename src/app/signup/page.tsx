@@ -32,9 +32,10 @@ export default function SignupPage(){
     const [loading,setLoading] = React.useState(false)
 
     const onSignup = async() =>{
+         if (buttonDisabled) return;
         try{
             setLoading(true);
-            const response = await axios.post("api/users/signup",user);
+            const response = await axios.post("/api/users/signup",user);
             console.log("Signup successfull",response.data);
             router.push("/login");
         }catch(error: any){
@@ -72,7 +73,7 @@ export default function SignupPage(){
         <input
             className="w-full p-3 mb-4 rounded-lg border border-gray-300 bg-white text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
             id="email"
-            type="text"
+            type="email"
             value={user.email}
             onChange={(e) => setUser({ ...user, email: e.target.value })}
             placeholder="Enter email"
