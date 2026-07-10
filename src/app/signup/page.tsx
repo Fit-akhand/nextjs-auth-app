@@ -44,6 +44,7 @@ export default function SignupPage(){
         }finally{
             setLoading(false);
         }
+        router.push("/login");
     }
 
     return(
