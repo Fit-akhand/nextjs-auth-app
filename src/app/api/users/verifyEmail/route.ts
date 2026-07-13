@@ -1,35 +1,84 @@
-import {connect} from "@/dbConfig/dbConfig"
-import { NextRequest , NextResponse } from "next/server";
+import { connect } from "@/dbConfig/dbConfig";
 import User from "@/models/UserModel";
+import { NextRequest, NextResponse } from "next/server";
 
 connect();
 
-
-export async function POST(request: NextRequest){
+export async function POST(request: NextRequest) {
     try {
-        const reqBody =  await request.json()
-        const {token} = reqBody
-        console.log(token);
-        
-        const user = await User.findOne({verifyToken: token, verifyTokenExpiry: {$gt:Date.now()}})
+        const reqBody = await request.json();
+        const { token } = reqBody;
 
-        if(!user){
-            return NextResponse.json({error : "Invalid Token"},{status: 400})
+        console.log("==================================");
+        console.log("Received Token:", token);
+
+        if (!token) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    error: "Token is required",
+                },
+                {
+                    status: 400,
+                }
+            );
         }
-        console.log(user);
+
+        const user = await User.findOne({
+            verifyToken: token,
+        });
+
+        console.log("Found User:", user);
+
+        if (!user) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    error: "Invalid Token",
+                },
+                {
+                    status: 400,
+                }
+            );
+        }
+
+        if (new Date(user.verifyTokenExpiry) < new Date()) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    error: "Token Expired",
+                },
+                {
+                    status: 400,
+                }
+            );
+        }
 
         user.isVerified = true;
         user.verifyToken = undefined;
-        user.veryfyTokenExpiry = undefined;
+        user.verifyTokenExpiry = undefined;
+
         await user.save();
 
+        console.log("User Verified Successfully");
+        console.log("==================================");
+
         return NextResponse.json({
+            success: true,
             message: "Email Verified Successfully",
-            success : true,
-        })
+        });
 
+    } catch (error: any) {
+        console.log("Verification Error:", error);
 
-    } catch (error:any) {
-        return NextResponse.json({error:error.message},{status: 500})
+        return NextResponse.json(
+            {
+                success: false,
+                error: error.message,
+            },
+            {
+                status: 500,
+            }
+        );
     }
 }

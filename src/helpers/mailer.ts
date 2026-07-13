@@ -6,6 +6,7 @@ export const sendmailer = async({email,emailType,userId}:any) =>{
     try {
         // create a hash token
         const hashToken = await bcryptjs.hash(userId.toString(),10)
+        console.log("Generated Token:", hashToken);
 
         if(emailType === "VERIFY"){
             await User.findByIdAndUpdate(userId,
